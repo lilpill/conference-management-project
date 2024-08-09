@@ -2,16 +2,16 @@ const { User } = require('../models');
 const bcrypt = require('bcryptjs');
 const { generateToken } = require('../middleware/auth');
 
-// Register a new user
+// Εγγραφή νέου χρήστη
 exports.register = async (data) => {
   const { username, password, fullName, role } = data;
 
-  // Validate password
+  // Επαλήθευση του κωδικού πρόσβασης
   if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/.test(password)) {
     throw new Error('Password must be at least 8 characters long and include both capital and lowercase letters, digits, and special characters.');
   }
 
-  // Validate username
+  // Επαλήθευση του ονόματος χρήστη
   if (!/^[a-zA-Z][a-zA-Z0-9_]{4,}$/.test(username)) {
     throw new Error('Username must start with a letter and be at least 5 characters long, consisting of alphanumeric characters or underscores.');
   }
@@ -21,7 +21,7 @@ exports.register = async (data) => {
   return user;
 };
 
-// User login
+// Σύνδεση χρήστη
 exports.login = async ({ username, password }) => {
   const user = await User.findOne({ where: { username } });
   if (user && await bcrypt.compare(password, user.password)) {
@@ -30,7 +30,7 @@ exports.login = async ({ username, password }) => {
   throw new Error('Invalid credentials');
 };
 
-// Update user information
+// Ενημέρωση πληροφοριών χρήστη
 exports.updateUser = async (userId, data) => {
   const user = await User.findByPk(userId);
   if (!user) {
@@ -39,7 +39,7 @@ exports.updateUser = async (userId, data) => {
 
   const { username, fullName, role } = data;
 
-  // Validate username if it's being updated
+  // Επαλήθευση του ονόματος χρήστη
   if (username && !/^[a-zA-Z][a-zA-Z0-9_]{4,}$/.test(username)) {
     throw new Error('Username must start with a letter and be at least 5 characters long, consisting of alphanumeric characters or underscores.');
   }
@@ -52,7 +52,7 @@ exports.updateUser = async (userId, data) => {
   return user;
 };
 
-// Update user password
+// Ενημέρωση κωδικού πρόσβασης χρήστη
 exports.updatePassword = async (userId, { oldPassword, newPassword }) => {
   const user = await User.findByPk(userId);
   if (!user) {
@@ -63,7 +63,7 @@ exports.updatePassword = async (userId, { oldPassword, newPassword }) => {
     throw new Error('Old password is incorrect');
   }
 
-  // Validate new password
+  // Επαλήθευση του νέου κωδικού πρόσβασης
   if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/.test(newPassword)) {
     throw new Error('New password must be at least 8 characters long and include both capital and lowercase letters, digits, and special characters.');
   }
@@ -73,7 +73,7 @@ exports.updatePassword = async (userId, { oldPassword, newPassword }) => {
   return user;
 };
 
-// Update user account status
+// Ενημέρωση κατάστασης λογαριασμού χρήστη
 exports.updateAccountStatus = async (userId, status) => {
   const user = await User.findByPk(userId);
   if (!user) {
@@ -85,7 +85,7 @@ exports.updateAccountStatus = async (userId, status) => {
   return user;
 };
 
-// Delete user account
+// Διαγραφή λογαριασμού χρήστη
 exports.deleteUser = async (userId) => {
   const user = await User.findByPk(userId);
   if (!user) {

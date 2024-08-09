@@ -1,7 +1,6 @@
 const userService = require('../services/userService');
 const { generateToken } = require('../middleware/auth');
 
-// Register a new user
 exports.register = async (req, res) => {
   try {
     const user = await userService.register(req.body);
@@ -11,7 +10,6 @@ exports.register = async (req, res) => {
   }
 };
 
-// User login
 exports.login = async (req, res) => {
   try {
     const token = await userService.login(req.body);
@@ -21,7 +19,6 @@ exports.login = async (req, res) => {
   }
 };
 
-// Update user information
 exports.updateUser = async (req, res) => {
   try {
     const user = await userService.updateUser(req.user.id, req.body);
@@ -31,7 +28,6 @@ exports.updateUser = async (req, res) => {
   }
 };
 
-// Update user password
 exports.updatePassword = async (req, res) => {
   try {
     const user = await userService.updatePassword(req.user.id, req.body);
@@ -41,7 +37,6 @@ exports.updatePassword = async (req, res) => {
   }
 };
 
-// Update user account status
 exports.updateAccountStatus = async (req, res) => {
   try {
     const user = await userService.updateAccountStatus(req.params.id, req.body.status);
@@ -51,7 +46,6 @@ exports.updateAccountStatus = async (req, res) => {
   }
 };
 
-// Delete user account
 exports.deleteUser = async (req, res) => {
   try {
     await userService.deleteUser(req.params.id);
