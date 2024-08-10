@@ -1,20 +1,8 @@
-module.exports = (sequelize, DataTypes) => {
-    const PcMember = sequelize.define('PcMember', {
-      userId: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-      },
-      conferenceId: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-      },
-    }, {});
-  
-    PcMember.associate = function(models) {
-      PcMember.belongsTo(models.User, { foreignKey: 'userId' });
-      PcMember.belongsTo(models.Conference, { foreignKey: 'conferenceId' });
-    };
-  
-    return PcMember;
-  };
-  
+const mongoose = require('mongoose');
+
+const pcMemberSchema = new mongoose.Schema({
+  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  conference: { type: mongoose.Schema.Types.ObjectId, ref: 'Conference' },
+}, { timestamps: true });
+
+module.exports = mongoose.model('PcMember', pcMemberSchema);

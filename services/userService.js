@@ -1,6 +1,6 @@
 const { User } = require('../models');
 const bcrypt = require('bcryptjs');
-const { generateToken } = require('../middleware/auth');
+const jwt = require('jsonwebtoken');
 
 // Εγγραφή νέου χρήστη
 exports.register = async (data) => {
@@ -17,22 +17,41 @@ exports.register = async (data) => {
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
-  const user = await User.create({ username, password: hashedPassword, fullName, role });
+  const user = new User({ username, password: hashedPassword, fullName, role });
+  await user.save();
   return user;
+};
+
+const generateToken = (user) => {
+  const payload = {
+    id: user._id,
+    username: user.username,
+    role: user.role,
+  };
+  return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' }); // Ensure JWT_SECRET is correctly set
 };
 
 // Σύνδεση χρήστη
 exports.login = async ({ username, password }) => {
-  const user = await User.findOne({ where: { username } });
-  if (user && await bcrypt.compare(password, user.password)) {
-    return generateToken(user);
+  const user = await User.findOne({ username });
+  if (!user) {
+    throw new Error('User not found');
   }
-  throw new Error('Invalid credentials');
+  
+  
+  const isPasswordMatch = await bcrypt.compare(password, user.password);
+  if (!isPasswordMatch) {
+    throw new Error('Password does not match');
+  }
+
+  return generateToken(user);
 };
+
+
 
 // Ενημέρωση πληροφοριών χρήστη
 exports.updateUser = async (userId, data) => {
-  const user = await User.findByPk(userId);
+  const user = await User.findById(userId);
   if (!user) {
     throw new Error('User not found');
   }
@@ -54,7 +73,8 @@ exports.updateUser = async (userId, data) => {
 
 // Ενημέρωση κωδικού πρόσβασης χρήστη
 exports.updatePassword = async (userId, { oldPassword, newPassword }) => {
-  const user = await User.findByPk(userId);
+  console.log(userId);
+  const user = await User.findById(userId);
   if (!user) {
     throw new Error('User not found');
   }
@@ -75,7 +95,7 @@ exports.updatePassword = async (userId, { oldPassword, newPassword }) => {
 
 // Ενημέρωση κατάστασης λογαριασμού χρήστη
 exports.updateAccountStatus = async (userId, status) => {
-  const user = await User.findByPk(userId);
+  const user = await User.findById(userId);
   if (!user) {
     throw new Error('User not found');
   }
@@ -87,10 +107,10 @@ exports.updateAccountStatus = async (userId, status) => {
 
 // Διαγραφή λογαριασμού χρήστη
 exports.deleteUser = async (userId) => {
-  const user = await User.findByPk(userId);
+  const user = await User.findById(userId);
   if (!user) {
     throw new Error('User not found');
   }
 
-  await user.destroy();
+  await user.deleteOne();
 };

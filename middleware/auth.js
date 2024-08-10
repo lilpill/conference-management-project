@@ -1,30 +1,32 @@
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
-const { User } = require('../models');
 
-const secret = 'your_jwt_secret';
+// Με την authenticate, ελέγχουμε αν ο χρήστης είναι συνδεδεμένος και αν έχει στείλει το token του.
+function authenticate(req, res, next) {
+  const token = req.header('Authorization')?.replace('Bearer ', '');
 
-const generateToken = (user) => {
-  return jwt.sign({ id: user.id, username: user.username, role: user.role }, secret, { expiresIn: '1h' });
-};
-
-const authenticate = async (req, res, next) => {
-  const token = req.headers['authorization'];
   if (!token) {
-    return res.status(401).send('Access denied. No token provided.');
+    return res.status(401).send({ error: 'Authentication required' });
   }
 
   try {
-    const decoded = jwt.verify(token.split(' ')[1], secret); 
-    req.user = await User.findByPk(decoded.id);
-    if (!req.user) {
-      return res.status(401).send('Invalid token.');
-    }
-    req.user = user;
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded;
     next();
-  } catch (error) {
-    res.status(400).send('Invalid token.');
+  } catch (err) {
+    res.status(401).send({ error: 'Invalid token' });
   }
-};
+}
 
-module.exports = { generateToken, authenticate };
+//  Με την authorize, ελέγχουμε αν ο ρόλος του χρήστη είναι εξουσιοδοτημένος να κάνει κάποια ενέργεια.
+function authorize(allowedRoles) {
+  return (req, res, next) => {
+    const { role } = req.user;
+    if (!allowedRoles.includes(role)) {
+      return res.status(403).send({ error: 'Access denied' });
+    }
+    next();
+  };
+}
+
+module.exports = { authenticate, authorize };
+  

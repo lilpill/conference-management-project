@@ -1,30 +1,22 @@
-module.exports = (sequelize, DataTypes) => {
-  const Conference = sequelize.define('Conference', {
-    name: {
-      type: DataTypes.STRING,
-      unique: true,
-      allowNull: false,
-    },
-    description: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    state: {
-      type: DataTypes.STRING,
-      defaultValue: 'CREATED',
-    },
-    createdAt: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      defaultValue: DataTypes.NOW,
-    },
-  }, {});
+const mongoose = require('mongoose');
 
-  Conference.associate = function(models) {
-    Conference.hasMany(models.PcChair, { foreignKey: 'conferenceId', as: 'pcChairs' });
-    Conference.hasMany(models.PcMember, { foreignKey: 'conferenceId', as: 'pcMembers' });
-    Conference.hasMany(models.Paper, { foreignKey: 'conferenceId', as: 'papers' });
-  };
+const conferenceSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    unique: true,
+    required: true,
+  },
+  description: {
+    type: String,
+    required: true,
+  },
+  state: {
+    type: String,
+    enum: ['CREATED', 'SUBMISSION', 'ASSIGNMENT', 'REVIEW', 'DECISION', 'FINAL_SUBMISSION', 'FINAL'],
+    default: 'CREATED',
+  },
+  pcChairs: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  pcMembers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+}, { timestamps: true });
 
-  return Conference;
-};
+module.exports = mongoose.model('Conference', conferenceSchema);

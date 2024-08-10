@@ -1,16 +1,19 @@
 const express = require('express');
-const { authenticate } = require('../middleware/auth');
+const { authenticate, authorize } = require('../middleware/auth');
 const conferenceController = require('../controllers/conferenceController');
 const router = express.Router();
 
-router.post('/', authenticate, conferenceController.createConference);
-router.get('/', authenticate, conferenceController.getConferences);
-router.get('/:id', authenticate, conferenceController.getConferenceById);
-router.put('/:id', authenticate, conferenceController.updateConference);
-router.put('/:id/state', authenticate, conferenceController.updateConferenceState);
-router.post('/:id/pcc', authenticate, conferenceController.addPcChairs);
-router.post('/:id/pcm', authenticate, conferenceController.addPcMembers);
-router.get('/search', authenticate, conferenceController.searchConferences);
-router.delete('/:id', authenticate, conferenceController.deleteConference);
+// Δημόσια routes
+router.get('/', conferenceController.getConferences);
+router.get('/:id', conferenceController.getConferenceById);
+router.get('/search', conferenceController.searchConferences);
+
+// Προστατευόμενα routes
+router.post('/', authenticate, authorize('USER'), conferenceController.createConference);
+router.put('/:id', authenticate, authorize('PC_CHAIR'), conferenceController.updateConference);
+router.put('/:id/state', authenticate, authorize('PC_CHAIR'), conferenceController.updateConferenceState);
+router.delete('/:id', authenticate, authorize('PC_CHAIR'), conferenceController.deleteConference);
+router.post('/:id/pcc', authenticate, authorize('PC_CHAIR'), conferenceController.addPcChairs);
+router.post('/:id/pcm', authenticate, authorize('PC_CHAIR'), conferenceController.addPcMembers);
 
 module.exports = router;
