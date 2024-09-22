@@ -265,5 +265,5 @@ exports.withdrawPaper = async (paperId) => {
     throw new Error('Paper not found');
   }
 
-  await paper.remove();
+  await paper.deleteOne();
 };

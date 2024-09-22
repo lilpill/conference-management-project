@@ -126,7 +126,7 @@ exports.deleteConference = async (conferenceId) => {
     throw new Error('Conference not found');
   }
 
-  await conference.remove();
+  await conference.deleteOne();
 };
 
 // Ενημέρωση κατάστασης διάσκεψης
